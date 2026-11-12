@@ -49,7 +49,7 @@ pub async fn http_basic(
     let mut s = timeout(to, TcpStream::connect((host, port))).await??;
     let cred = STANDARD.encode(format!("{user}:{pass}"));
     let req = format!(
-        "GET {path} HTTP/1.1\r\nHost: {host}\r\nAuthorization: Basic {cred}\r\nUser-Agent: brutereap\r\nConnection: close\r\n\r\n"
+        "GET {path} HTTP/1.1\r\nHost: {host}\r\nAuthorization: Basic {cred}\r\nUser-Agent: cr4ckreap\r\nConnection: close\r\n\r\n"
     );
     s.write_all(req.as_bytes()).await?;
     let mut buf = [0u8; 256];

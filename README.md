@@ -1,4 +1,4 @@
-# brutereap
+# cr4ckreap
 
 Bruteforce de login **multi-protocolo** para pentest autorizado — o irmão
 "online" do [credreap](https://github.com/grimh3xx/credreap). Engine concorrente
@@ -16,8 +16,8 @@ com um protocolo por módulo.
 
 ## Uso
 ```sh
-brutereap ftp 10.0.0.5 -u admin -P rockyou.txt --stop-on-success
-brutereap http-basic alvo.com -U users.txt -P pass.txt --path /admin -c 32
+cr4ckreap ftp 10.0.0.5 -u admin -P rockyou.txt --stop-on-success
+cr4ckreap http-basic alvo.com -U users.txt -P pass.txt --path /admin -c 32
 ```
 Combina listas (`-U`/`-P`) ou valores únicos (`-u`/`-p`). Sucessos vão pro
 stdout com `[+] VÁLIDO user:pass`.

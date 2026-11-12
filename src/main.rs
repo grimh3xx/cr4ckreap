@@ -8,9 +8,9 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Semaphore;
 
-/// brutereap — bruteforce de login multi-protocolo (uso autorizado apenas).
+/// cr4ckreap — bruteforce de login multi-protocolo (uso autorizado apenas).
 #[derive(Parser)]
-#[command(name = "brutereap", version, about)]
+#[command(name = "cr4ckreap", version, about)]
 struct Cli {
     /// Protocolo alvo.
     #[arg(value_enum)]
@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
     let to = Duration::from_millis(cli.timeout);
     let total = users.len() * passes.len();
     eprintln!(
-        "[*] brutereap: {:?} {}:{} — {} combinações, c={}",
+        "[*] cr4ckreap: {:?} {}:{} — {} combinações, c={}",
         cli.proto, cli.target, port, total, cli.concurrency
     );
 
