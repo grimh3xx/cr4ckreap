@@ -3,7 +3,7 @@ name = "cr4ckreap"
 version = "0.1.0"
 edition = "2021"
 authors = ["grimh3xx"]
-description = "Bruteforce de login multi-protocolo para pentest autorizado (irmão online do credreap)."
+description = "Multi-protocol login bruteforce for authorised pentests (the online twin of credreap)."
 license = "MIT"
 repository = "https://github.com/grimh3xx/cr4ckreap"
 keywords = ["pentest", "bruteforce", "ftp", "http", "credentials"]
@@ -17,7 +17,11 @@ tokio = { version = "1.42", features = ["rt-multi-thread", "net", "macros", "io-
 clap = { version = "4.5", features = ["derive"] }
 anyhow = "1"
 base64 = "0.22"
+russh = "0.65"
 
 [profile.release]
 strip = true
 lto = true
+
+[dev-dependencies]
+rand = "0.10"

@@ -83,16 +83,20 @@ class Session:
 
 def build():
     s = Session()
-    s.out([seg("cr4ckreap", "cyan", True), seg(" — authorised use only", "muted")], dur=1)
+    s.out([seg("cr4ckreap", "cyan", True), seg(" \u2014 authorised use only", "muted")], dur=1)
     s.blank()
-    s.type("cr4ckreap ftp 10.0.0.5 -u admin -P rockyou.txt --stop-on-success")
+    s.type("cr4ckreap ssh 10.0.0.5 -U users.txt -P rockyou.txt --stop-on-success")
     s.enter()
-    s.out([seg("[*] cr4ckreap: ", "text"), seg("Ftp 10.0.0.5:21", "white"), seg(" — 14344399 combinacoes, c=16", "muted")])
-    s.out([seg("    admin:123456           ", "muted"), seg("530", "red")])
-    s.out([seg("    admin:password         ", "muted"), seg("530", "red")])
-    s.out([seg("    admin:Spring2024!      ", "muted"), seg("230", "green", True)])
-    s.out([seg("[+] VALIDO  ", "green", True), seg("admin:Spring2024!", "white", True)])
-    s.out([seg("[*] concluido: 1 credencial valida", "green")])
+    s.out([seg("[*] cr4ckreap: ", "text"), seg("Ssh 10.0.0.5:22", "white"), seg(" \u2014 43200 combinations, c=16", "muted")])
+    s.out([seg("    root:123456         ", "muted"), seg("denied", "red")])
+    s.out([seg("    admin:admin          ", "muted"), seg("denied", "red")])
+    s.out([seg("    deploy:Summer2024!   ", "muted"), seg("accepted", "green", True)])
+    s.out([seg("[+] VALID  ", "green", True), seg("deploy:Summer2024!", "white", True)])
+    s.out([seg("[*] done: 1 valid credential", "green")])
+    s.blank()
+    s.type("cr4ckreap http-basic 10.0.0.9 --path /admin -u admin -P pass.txt")
+    s.enter()
+    s.out([seg("[+] VALID  ", "green", True), seg("admin:P@ssw0rd", "white", True)])
     s.cursor_hold()
     return s
 

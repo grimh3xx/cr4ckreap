@@ -1,4 +1,4 @@
-# cr4ckreap
+<img src="docs/banner.svg" alt="cr4ckreap" width="100%">
 
 [![build](https://img.shields.io/github/actions/workflow/status/grimh3xx/cr4ckreap/build.yml?branch=main&style=flat-square&labelColor=111826&label=build)](https://github.com/grimh3xx/cr4ckreap/actions)
 [![license](https://img.shields.io/github/license/grimh3xx/cr4ckreap?style=flat-square&labelColor=111826&color=22D3EE)](LICENSE)
@@ -7,38 +7,45 @@
 ![authorised use](https://img.shields.io/badge/authorised%20use-only-F87171?style=flat-square&labelColor=111826)
 
 
-**Bruteforce de login multi-protocolo em Rust** para pentest autorizado — o irmão
-"online" do [credreap](https://github.com/grimh3xx/credreap). Engine concorrente
-com um protocolo por módulo e parada opcional no primeiro acerto.
+**Multi-protocol login bruteforce in Rust** for authorised pentests — the online
+twin of [credreap](https://github.com/grimh3xx/credreap). Concurrent engine with
+one protocol per module and optional stop-on-first-hit.
 
 <p align="center"><img src="docs/demo.svg" alt="cr4ckreap demo" width="100%"></p>
 
-> ## ⚠️ Uso autorizado apenas
-> Bruteforce/spray contra serviços sem permissão é crime e pode travar contas.
-> Rode **somente** com escopo e autorização. A responsabilidade é sua.
+> ## ⚠️ Authorised use only
+> Bruteforce/spray against services without permission is a crime and can lock
+> accounts out. Run **only** with scope and authorisation. You are responsible.
 
-## Protocolos
+## Protocols
 
-| protocolo | estado |
+| protocol | state |
 |---|---|
-| `ftp`        | ✅ funcional (USER/PASS, códigos 230/530) |
-| `http-basic` | ✅ funcional (Authorization: Basic, 401/403 = negado) |
-| `ssh`        | 🚧 planejado (via `russh`) |
+| `ssh`        | ✅ working (russh password auth; covered by an in-process server test) |
+| `ftp`        | ✅ working (USER/PASS, multi-line reply aware) |
+| `http-basic` | ✅ working (Authorization: Basic, 401/403 = denied) |
 
-## Uso
+## Usage
 
 ```sh
+cr4ckreap ssh 10.0.0.5 -U users.txt -P rockyou.txt --stop-on-success
 cr4ckreap ftp 10.0.0.5 -u admin -P rockyou.txt --stop-on-success
-cr4ckreap http-basic alvo.com -U users.txt -P pass.txt --path /admin -c 32
+cr4ckreap http-basic site.com -U users.txt -P pass.txt --path /admin -c 32
 ```
 
-Combina listas (`-U`/`-P`) ou valores únicos (`-u`/`-p`). Sucessos saem com
-`[+] VÁLIDO user:pass`.
+Mix lists (`-U`/`-P`) or single values (`-u`/`-p`). Hits print as
+`[+] VALID user:pass`.
+
+## Tests
+
+```sh
+cargo test --release      # unit + in-process SSH server (accept & reject paths)
+```
 
 ## Roadmap
 
-- SSH (`russh`), SMB e RDP (reaproveitando o [rdpr0wl](https://github.com/grimh3xx/rdpr0wl)).
-- Jitter/throttle por host pra evitar lockout.
+- SMB and RDP (reusing [rdpr0wl](https://github.com/grimh3xx/rdpr0wl)).
+- Per-host jitter/throttle to avoid lockout.
 
 ## Build
 
@@ -46,6 +53,6 @@ Combina listas (`-U`/`-P`) ou valores únicos (`-u`/`-p`). Sucessos saem com
 cargo build --release
 ```
 
-## Licença
+## License
 
-MIT. Veja [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

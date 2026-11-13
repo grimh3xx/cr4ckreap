@@ -1,55 +1,54 @@
-mod proto;
+use cr4ckreap::proto::{self, Proto};
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use proto::Proto;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Semaphore;
 
-/// cr4ckreap — bruteforce de login multi-protocolo (uso autorizado apenas).
+/// cr4ckreap — multi-protocol login bruteforce (authorised use only).
 #[derive(Parser)]
 #[command(name = "cr4ckreap", version, about)]
 struct Cli {
-    /// Protocolo alvo.
+    /// Target protocol.
     #[arg(value_enum)]
     proto: Proto,
 
-    /// Host alvo.
+    /// Target host.
     target: String,
 
-    /// Usuário único.
+    /// Single username.
     #[arg(short = 'u', long, group = "userspec")]
     user: Option<String>,
-    /// Arquivo de usuários (um por linha).
+    /// Username file (one per line).
     #[arg(short = 'U', long, group = "userspec")]
     userlist: Option<String>,
 
-    /// Senha única.
+    /// Single password.
     #[arg(short = 'p', long, group = "passspec")]
     pass: Option<String>,
-    /// Arquivo de senhas (um por linha).
+    /// Password file (one per line).
     #[arg(short = 'P', long, group = "passspec")]
     passlist: Option<String>,
 
-    /// Porta (padrão por protocolo).
+    /// Port (defaults per protocol).
     #[arg(long)]
     port: Option<u16>,
 
-    /// Caminho HTTP (só http-basic).
+    /// HTTP path (http-basic only).
     #[arg(long, default_value = "/")]
     path: String,
 
-    /// Concorrência.
+    /// Concurrency.
     #[arg(short, long, default_value_t = 16)]
     concurrency: usize,
 
-    /// Timeout por tentativa (ms).
+    /// Per-attempt timeout (ms).
     #[arg(long, default_value_t = 5000)]
     timeout: u64,
 
-    /// Para no primeiro sucesso.
+    /// Stop at the first success.
     #[arg(long)]
     stop_on_success: bool,
 }
@@ -59,7 +58,8 @@ fn load(single: Option<String>, list: Option<String>, what: &str) -> Result<Vec<
         return Ok(vec![s]);
     }
     if let Some(path) = list {
-        let data = std::fs::read_to_string(&path).with_context(|| format!("lendo {what}: {path}"))?;
+        let data =
+            std::fs::read_to_string(&path).with_context(|| format!("reading {what}: {path}"))?;
         return Ok(data
             .lines()
             .map(|l| l.trim().to_string())
@@ -80,19 +80,19 @@ fn default_port(p: Proto) -> u16 {
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
-    let users = load(cli.user.clone(), cli.userlist.clone(), "usuários")?;
-    let passes = load(cli.pass.clone(), cli.passlist.clone(), "senhas")?;
+    let users = load(cli.user.clone(), cli.userlist.clone(), "usernames")?;
+    let passes = load(cli.pass.clone(), cli.passlist.clone(), "passwords")?;
     if users.is_empty() {
-        anyhow::bail!("informe -u ou -U");
+        anyhow::bail!("provide -u or -U");
     }
     if passes.is_empty() {
-        anyhow::bail!("informe -p ou -P");
+        anyhow::bail!("provide -p or -P");
     }
     let port = cli.port.unwrap_or_else(|| default_port(cli.proto));
     let to = Duration::from_millis(cli.timeout);
     let total = users.len() * passes.len();
     eprintln!(
-        "[*] cr4ckreap: {:?} {}:{} — {} combinações, c={}",
+        "[*] cr4ckreap: {:?} {}:{} — {} combinations, c={}",
         cli.proto, cli.target, port, total, cli.concurrency
     );
 
@@ -124,7 +124,7 @@ async fn main() -> Result<()> {
                 match res {
                     Ok(true) => {
                         found.store(true, Ordering::Relaxed);
-                        println!("[+] VÁLIDO  {u}:{p}");
+                        println!("[+] VALID  {u}:{p}");
                         Some((u, p))
                     }
                     Ok(false) => None,
@@ -140,6 +140,6 @@ async fn main() -> Result<()> {
             hits.push(hit);
         }
     }
-    eprintln!("[*] concluído: {} credencial(is) válida(s)", hits.len());
+    eprintln!("[*] done: {} valid credential(s)", hits.len());
     Ok(())
 }
