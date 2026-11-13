@@ -33,16 +33,15 @@ async fn ftp_reply(s: &mut TcpStream, to: Duration) -> Result<u16> {
 }
 
 /// Returns the code of a completed FTP reply, or None if more data is needed.
+/// Operates on raw bytes (a reply line "ddd " ends the reply) so arbitrary,
+/// non-UTF-8 input can never panic.
 fn final_ftp_code(buf: &[u8]) -> Option<u16> {
-    let text = String::from_utf8_lossy(buf);
-    for line in text.lines() {
-        if line.len() >= 4 {
-            let (code, sep) = (&line[0..3], &line[3..4]);
-            if sep == " " {
-                if let Ok(c) = code.parse::<u16>() {
-                    return Some(c);
-                }
-            }
+    for line in buf.split(|&b| b == b'\n') {
+        if line.len() >= 4 && line[3] == b' ' && line[0..3].iter().all(u8::is_ascii_digit) {
+            let code = (line[0] - b'0') as u16 * 100
+                + (line[1] - b'0') as u16 * 10
+                + (line[2] - b'0') as u16;
+            return Some(code);
         }
     }
     None
@@ -127,6 +126,17 @@ pub async fn ssh(host: &str, port: u16, user: &str, pass: &str, to: Duration) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn fuzz_ftp_parser_no_panic() {
+        let mut x: u64 = 0xDEADBEEFCAFEBABE;
+        for _ in 0..20_000 {
+            x ^= x << 13; x ^= x >> 7; x ^= x << 17;
+            let len = (x as usize) % 400;
+            let buf: Vec<u8> = (0..len).map(|i| (x >> (i % 56)) as u8).collect();
+            let _ = final_ftp_code(&buf);
+        }
+    }
 
     #[test]
     fn ftp_multiline_reply_uses_final_code() {

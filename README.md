@@ -34,7 +34,8 @@ cr4ckreap http-basic site.com -U users.txt -P pass.txt --path /admin -c 32
 ```
 
 Mix lists (`-U`/`-P`) or single values (`-u`/`-p`). Hits print as
-`[+] VALID user:pass`.
+`[+] VALID user:pass`. Throttle with `--delay <ms>` and `--jitter <ms>` to
+space attempts and avoid account lockout.
 
 ## Tests
 
@@ -45,7 +46,7 @@ cargo test --release      # unit + in-process SSH server (accept & reject paths)
 ## Roadmap
 
 - SMB and RDP (reusing [rdpr0wl](https://github.com/grimh3xx/rdpr0wl)).
-- Per-host jitter/throttle to avoid lockout.
+- Lockout detection (stop on repeated 530/account-locked).
 
 ## Build
 

@@ -29,9 +29,11 @@ impl Handler for Sess {
 }
 
 async fn spawn_server() -> u16 {
-    let mut config = Config::default();
-    config.auth_rejection_time = Duration::from_millis(50);
-    config.inactivity_timeout = Some(Duration::from_secs(5));
+    let mut config = Config {
+        auth_rejection_time: Duration::from_millis(50),
+        inactivity_timeout: Some(Duration::from_secs(5)),
+        ..Default::default()
+    };
     config
         .keys
         .push(PrivateKey::random(&mut rand::rng(), Algorithm::Ed25519).unwrap());

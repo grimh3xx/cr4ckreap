@@ -7,6 +7,20 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Semaphore;
 
+/// Cheap per-call pseudo-random in [0, n) for jitter (no rng dependency).
+fn jitter_ms(n: u64) -> u64 {
+    if n == 0 {
+        return 0;
+    }
+    let t = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos() as u64)
+        .unwrap_or(0);
+    let mut x = t ^ 0x9E3779B97F4A7C15;
+    x ^= x << 13; x ^= x >> 7; x ^= x << 17;
+    x % n
+}
+
 /// cr4ckreap — multi-protocol login bruteforce (authorised use only).
 #[derive(Parser)]
 #[command(name = "cr4ckreap", version, about)]
@@ -51,6 +65,14 @@ struct Cli {
     /// Stop at the first success.
     #[arg(long)]
     stop_on_success: bool,
+
+    /// Fixed delay (ms) before each attempt — throttle to avoid lockout.
+    #[arg(long, default_value_t = 0)]
+    delay: u64,
+
+    /// Random extra delay (ms) added before each attempt (0..jitter).
+    #[arg(long, default_value_t = 0)]
+    jitter: u64,
 }
 
 fn load(single: Option<String>, list: Option<String>, what: &str) -> Result<Vec<String>> {
@@ -115,6 +137,10 @@ async fn main() -> Result<()> {
                 let _permit = sem.acquire().await.ok()?;
                 if cli.stop_on_success && found.load(Ordering::Relaxed) {
                     return None;
+                }
+                let wait = cli.delay + jitter_ms(cli.jitter);
+                if wait > 0 {
+                    tokio::time::sleep(Duration::from_millis(wait)).await;
                 }
                 let res = match proto {
                     Proto::Ftp => proto::ftp(&host, port, &u, &p, to).await,
